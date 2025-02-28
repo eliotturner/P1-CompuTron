@@ -138,7 +138,7 @@ void execute(std::array<int, memorySize>& memory, int* const acPtr,
 				*acPtr == 0 ? *icPtr = *opPtr : ++(*icPtr);
 				break;
 			case Command::halt:
-				dump(memory, acPtr, *icPtr, *irPtr, *opCodePtr, *opPtr);
+				//dump(memory, acPtr, *icPtr, *irPtr, *opCodePtr, *opPtr);
 				break;
 			default:
 				//any instruction necessary?
