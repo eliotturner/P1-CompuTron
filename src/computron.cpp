@@ -22,7 +22,7 @@ void load_from_file(std::array<int, memorySize>& memory, const std::string& file
 		if (instruction == sentinel)
 			break;
 
-		if (!validWord(instruction))
+		if (validWord(instruction))
 		{
 			memory[i] = instruction;
 			i++;
@@ -39,17 +39,17 @@ Command opCodeToCommand(size_t opCode)
 	switch (opCode)
 	{
 		case 10: return Command::read; break;
-		case 11: return Command::read; break;
-		case 20: return Command::read; break;
-		case 21: return Command::read; break;
-		case 30: return Command::read; break;
-		case 31: return Command::read; break;
-		case 32: return Command::read; break;
-		case 33: return Command::read; break;
-		case 40: return Command::read; break;
-		case 41: return Command::read; break;
-		case 42: return Command::read; break;
-		case 43: return Command::read; break;
+		case 11: return Command::write; break;
+		case 20: return Command::load; break;
+		case 21: return Command::store; break;
+		case 30: return Command::add; break;
+		case 31: return Command::subtract; break;
+		case 32: return Command::divide; break;
+		case 33: return Command::multiply; break;
+		case 40: return Command::branch; break;
+		case 41: return Command::branchNeg; break;
+		case 42: return Command::branchZero; break;
+		case 43: return Command::halt; break;
 		default: return Command::halt;
 	}
 }
@@ -156,7 +156,8 @@ void dump(std::array<int, memorySize>& memory, int* const acPtr,
 	//print column labels
 	std::cout << "    "; //pad
 	for (int col = 0; col < 10; col++)
-		std::cout << std::setw(5) << col;
+		std::cout << col << "    ";
+	std::cout << "\n";
 
 	for (int row = 0; row < 10; ++row) {
 		//print row label
@@ -167,7 +168,7 @@ void dump(std::array<int, memorySize>& memory, int* const acPtr,
 		{
 			int val = memory[row * 10 + col];
 			if (val < 0)
-				std::cout << "-" << std::setw(4) << std::setfill('0') << memory[row * 10 + col];
+				std::cout << "-" << std::setw(4) << std::setfill('0') << abs(memory[row * 10 + col]);
 			else
 				std::cout << "+" << std::setw(4) << std::setfill('0') << memory[row * 10 + col];
 		}
