@@ -77,8 +77,8 @@ void execute(std::array<int, memorySize>& memory, int* const acPtr,
 				break;
 			case Command::write:
 				++(*icPtr);
-				std::cout << "Contents of " << std::setfill('0') << std::setw(4);
-				std::cout << *opPtr << " : " << memory[*opPtr] << "\n";
+				//std::cout << "Contents of " << std::setfill('0') << std::setw(4);
+				//std::cout << *opPtr << " : " << memory[*opPtr] << "\n";
 				break;
 			case Command::load:
 				*acPtr = memory[*opPtr];
