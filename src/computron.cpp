@@ -188,7 +188,7 @@ bool validWord(int word)
 
 void output(std::string label, int width, int value, bool sign)
 {
-	std::cout << label << '\t\t';
+	std::cout << label << "\t\t";
 	if (sign)
 		std::cout << '+' << std::setw(width) << value;
 	else
