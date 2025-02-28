@@ -119,6 +119,8 @@ void execute(std::array<int, memorySize>& memory, int* const acPtr,
 					throw std::runtime_error("invalid_input");
 				break;
 			case Command::divide:
+				if (memory[*opPtr] == 0)
+					throw std::runtime_error("invalid_input");
 				word = *acPtr / memory[*opPtr];
 				if (validWord(word))
 				{
