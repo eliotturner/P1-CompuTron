@@ -36,6 +36,23 @@ TEST_CASE("Load memory from file", "[load_from_file]") {
     {
         REQUIRE(memory[i] == 0);
     }
+
+   
+    //create file with invalid inputs to read
+    std::ofstream outfile("test.txt");
+    outfile << "+1007" << std::endl
+            << "+2008" << std::endl
+            << "+100000" << std::endl; //invalid word
+    outfile.close();
+    REQUIRE_THROWS_AS(load_from_file(memory, "test.txt"), std::runtime_error);
+
+    //create file with invalid inputs to read
+    std::ofstream outfile1("test1.txt");
+    outfile1 << "+1007" << std::endl
+        << "+2008" << std::endl
+        << "-100000" << std::endl; //invalid word
+    outfile1.close();
+    REQUIRE_THROWS_AS(load_from_file(memory, "test1.txt"), std::runtime_error);
 }
 
 TEST_CASE("Execute full program", "[execute]") {
@@ -160,6 +177,36 @@ TEST_CASE("Execute Operations", "[execute]") {
 
         //check mult output
         REQUIRE(memory[20] == 50);
+    }
+
+    SECTION("Overflow Arithmetic Operations")
+    {
+        int accumulator{ 0 }; //create Registers
+        size_t instructionCounter{ 0 };
+        int instructionRegister{ 0 };
+        size_t operationCode{ 0 };
+        size_t operand{ 0 };
+        const std::vector<int> inputs{ 1000, 100 };
+
+        //Test 
+        std::array<int, memorySize> memory{ 0 };
+        memory[0] = 1006; //read operands 1000, 100
+        memory[1] = 1007;
+        memory[2] = 2006; //load 1000
+
+        memory[3] = 3307; // 1000*100= 100,000 > wordMax
+        memory[4] = 2108;
+
+        memory[5] = 4300; //halt
+
+        //execute
+        REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs), std::runtime_error);
+
+        //check loaded inputs and registers
+        REQUIRE(accumulator == 1000);
+        REQUIRE(instructionCounter == 3);
+        REQUIRE(instructionRegister == 3307);
+        REQUIRE(memory[8] == 0);
     }
 
     SECTION("Instruction Control Operations")
