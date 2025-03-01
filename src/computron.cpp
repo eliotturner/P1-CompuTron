@@ -78,7 +78,12 @@ void execute(std::array<int, memorySize>& memory, int* const acPtr,
 		switch (int word{}; opCodeToCommand(*opCodePtr))
 		{
 			case Command::read:
-				word = inputs[inputIndex]; //read input
+				if (inputIndex < inputs.size())
+				{
+					word = inputs[inputIndex]; //read input
+				}
+				else
+					throw std::runtime_error("invalid_input");
 				memory[*opPtr] = word; //write to mem
 				++(*icPtr); 
 				inputIndex++;
@@ -213,6 +218,9 @@ void output(std::string label, int width, int value, bool sign)
 {
 	//print the label with a constant width for formatting
 	std::cout << std::setw(22) << std::setfill(' ') << std::left << label << "\t";
+
+	//reset cout formatting
+	std::cout << std::right;
 	
 	//add sign if necessary
 	if (sign)
@@ -225,7 +233,4 @@ void output(std::string label, int width, int value, bool sign)
 
 	//add zero-filled value (signless)
 	std::cout << std::setfill('0') << std::setw(width) << abs(value) << '\n';
-
-	//reset cout formatting
-	std::cout << std::right;
 }
