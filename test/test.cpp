@@ -179,7 +179,7 @@ TEST_CASE("Execute Operations", "[execute]") {
         REQUIRE(memory[20] == 50);
     }
 
-    SECTION("Overflow Arithmetic Operations")
+    SECTION("Invalid/Overflow Arithmetic Operations")
     {
         int accumulator{ 0 }; //create Registers
         size_t instructionCounter{ 0 };
@@ -207,6 +207,25 @@ TEST_CASE("Execute Operations", "[execute]") {
         REQUIRE(instructionCounter == 3);
         REQUIRE(instructionRegister == 3307);
         REQUIRE(memory[8] == 0);
+
+        
+        //Invalid division
+        accumulator = 0; //create Registers
+        instructionCounter = 0;
+        instructionRegister = 0;
+        operationCode = 0;
+        operand = 0;
+
+        std::fill(memory.begin(), memory.end(), 0);
+        memory[0] = 1005; //read operand 1000
+        memory[1] = 2005; //load 1000
+
+        memory[2] = 3206; // 1000 / 0 = INVALID
+        memory[3] = 2107;
+
+        memory[4] = 4300; //halt
+
+        REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs), std::runtime_error);
     }
 
     SECTION("Instruction Control Operations")
@@ -253,5 +272,36 @@ TEST_CASE("Execute Operations", "[execute]") {
 
         //check memory[17] for modification
         REQUIRE(memory[17] == 0);
+
+
+
+        //now do the same, but with failed branches
+        accumulator = 0; //create Registers
+        instructionCounter = 0;
+        instructionRegister = 0;
+        operationCode = 0;
+        operand = 0;
+
+        std::fill(memory.begin(), memory.end(), 0);
+        memory[0] = 1010; //load 5
+        memory[1] = 1011; //load -2
+        memory[2] = 1012; //load 0
+
+        memory[3] = 2010; //5 to acc
+        memory[4] = 4106; // BRANCH_NEG
+        memory[5] = 2113; //store 5 to mem[13]
+
+        memory[6] = 2011; //-2 to acc
+        memory[7] = 4209; //BRANCH_ZERO
+        memory[8] = 2114; //store 5 to mem[14]
+
+        memory[9] = 4300; //halt
+
+        //execute
+        execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs);
+   
+        //check both statements were not skipped
+        REQUIRE(memory[13] == 5);
+        REQUIRE(memory[14] == -2);
     }
 }
