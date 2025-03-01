@@ -53,6 +53,11 @@ TEST_CASE("Load memory from file", "[load_from_file]") {
         << "-100000" << std::endl; //invalid word
     outfile1.close();
     REQUIRE_THROWS_AS(load_from_file(memory, "test1.txt"), std::runtime_error);
+
+
+    //invalid file name
+    REQUIRE_THROWS_AS(load_from_file(memory, "notreal.txt"), std::runtime_error);
+
 }
 
 TEST_CASE("Execute full program", "[execute]") {
@@ -124,6 +129,15 @@ TEST_CASE("Execute Operations", "[execute]") {
 
         //check store
         REQUIRE(memory[9] == 5);
+
+
+        accumulator = 0; //create Registers
+        instructionCounter = 0;
+        instructionRegister = 0;
+        operationCode = 0;
+        operand = 0;
+        //Check invalid (read with no inputs)
+        REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, {}), std::runtime_error);
     }
 
     SECTION("Arithmetic Operations")
@@ -188,7 +202,7 @@ TEST_CASE("Execute Operations", "[execute]") {
         size_t operand{ 0 };
         const std::vector<int> inputs{ 1000, 100 };
 
-        //Test 
+        //Overflow Multiplication
         std::array<int, memorySize> memory{ 0 };
         memory[0] = 1006; //read operands 1000, 100
         memory[1] = 1007;
@@ -208,7 +222,69 @@ TEST_CASE("Execute Operations", "[execute]") {
         REQUIRE(instructionRegister == 3307);
         REQUIRE(memory[8] == 0);
 
+
+
+
+        //Overflow Addition
+        accumulator = 0; //create Registers
+        instructionCounter = 0;
+        instructionRegister = 0;
+        operationCode = 0;
+        operand = 0;
+        const std::vector<int> inputs1{ 99999, 1 };
+
+        std::fill(memory.begin(), memory.end(), 0);
+        memory[0] = 1006; //read operands 1000, 100
+        memory[1] = 1007;
+        memory[2] = 2006; //load 1000
+
+        memory[3] = 3007; // 99999+1 = 100,000 > wordMax
+        memory[4] = 2108;
+
+        memory[5] = 4300; //halt
+
+        //execute
+        REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs1), std::runtime_error);
+
+        //check loaded inputs and registers
+        REQUIRE(accumulator == 99999);
+        REQUIRE(instructionCounter == 3);
+        REQUIRE(instructionRegister == 3007);
+        REQUIRE(memory[8] == 0);
+
+
+
+
+        //Overflow Subtraction
+        accumulator = 0; //create Registers
+        instructionCounter = 0;
+        instructionRegister = 0;
+        operationCode = 0;
+        operand = 0;
+        const std::vector<int> inputs2{ -99999, 1 };
+
+        std::fill(memory.begin(), memory.end(), 0);
+        memory[0] = 1006; //read operands 1000, 100
+        memory[1] = 1007;
+        memory[2] = 2006; //load 1000
+
+        memory[3] = 3107; // -99999-1 = -100,000 > wordMax
+        memory[4] = 2108;
+
+        memory[5] = 4300; //halt
+
+        //execute
+        REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs2), std::runtime_error);
+
+        //check loaded inputs and registers
+        REQUIRE(accumulator == -99999);
+        REQUIRE(instructionCounter == 3);
+        REQUIRE(instructionRegister == 3107);
+        REQUIRE(memory[8] == 0);
+
+
         
+
         //Invalid division
         accumulator = 0; //create Registers
         instructionCounter = 0;
@@ -226,6 +302,13 @@ TEST_CASE("Execute Operations", "[execute]") {
         memory[4] = 4300; //halt
 
         REQUIRE_THROWS_AS(execute(memory, &accumulator, &instructionCounter, &instructionRegister, &operationCode, &operand, inputs), std::runtime_error);
+
+        //check loaded inputs and registers
+        REQUIRE(accumulator == 1000);
+        REQUIRE(instructionCounter == 2);
+        REQUIRE(instructionRegister == 3206);
+        REQUIRE(memory[7] == 0);
+
     }
 
     SECTION("Instruction Control Operations")
